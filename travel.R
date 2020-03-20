@@ -279,7 +279,7 @@ china_trade <- trade_data %>%
 
 china_trade$dest <- toupper(china_trade$dest)
 
-#merge test
+#merge data
 
 merged <- wb_arrival %>%
   full_join(cn_outbound[, c(5, 2, 3)], by = c("Country.Code" = "iso3c")) %>%
@@ -302,8 +302,10 @@ merged <- merged %>%
 travel_leak <- merged %>%
   filter(hot_travel == 1)
 
-write.csv(merged, "data/all_merged.csv")
-write.csv(travel_leak, "data/travel_eu_me.csv")
+#write.csv(merged, "data/all_merged.csv")
+#write.csv(travel_leak, "data/travel_eu_me.csv")
+
+#plot
 
 ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(`20200318`), label = Country.Name)) + 
   geom_text_repel() + 
@@ -321,7 +323,7 @@ ggplot(travel_leak, aes(x = log(tw_exposed), y = imported_sum, label = Country.N
   ylab('台灣境外確診人數')+
   xlab('Log(台灣旅客暴露度)')
 
-
+###end
 
 
 hist(log(travel_leak$cn_tour_dense))
