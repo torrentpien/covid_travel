@@ -293,35 +293,65 @@ merged <- wb_arrival %>%
 
 merged[, 19:34][is.na(merged[, 19:34])] <- 0
 
+merged <- read.csv("data/all_merged.csv", stringsAsFactors = FALSE)
+
 merged <- merged %>%
   mutate(tour_popu_2017 = sum_2017 + cn_arr_2017,
          tour_popu_2018 = sum_2018 + cn_arr_2018,
-         cn_tour_dense = tour_popu_2018 / dense_2018,
-         tw_exposed = sum / cn_tour_dense)
+         cn_tour_dense = tour_popu_2018 * dense_2018,
+         tw_exposed = sum * cn_tour_dense)
 
 travel_leak <- merged %>%
   filter(hot_travel == 1)
 
+
+
 #write.csv(merged, "data/all_merged.csv")
 #write.csv(travel_leak, "data/travel_eu_me.csv")
 
+
 #plot
 
-ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(`20200318`), label = Country.Name)) + 
+crucial_date <- colnames(travel_leak)[20:34]
+
+for (i in 1:15) {
+  
+  df_plot <- data.frame(x = log(travel_leak$cn_tour_dense), y = log(travel_leak[, crucial_date[i]] + 1), name = travel_leak$Country.Name)
+  
+  date <- paste0(substr(crucial_date[i], 7, 7), "月", substr(crucial_date[i], 8, 9), "日")
+  
+  cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
+    geom_text_repel() + 
+    theme_minimal()+
+    geom_point()+
+    ggtitle("歐洲、地中海週邊旅遊區\n中國旅遊密集度與確診人數關係") + 
+    ylab(paste0("Log(", date, "各國確診人數)")) +
+    xlab('Log(中國旅客密集度)') +
+    theme(text = element_text(family = "Heiti TC Medium"))
+  
+  ggsave(paste0("plot/", crucial_date[i], ".png"), plot = cd_plot)
+  
+}
+
+ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(X20200318), label = Country.Name)) + 
   geom_text_repel() + 
   theme_minimal()+
   geom_point()+
   ggtitle("歐洲、地中海週邊旅遊區\n中國旅遊密集度與確診人數關係") + 
   ylab('Log(3月18日各國確診人數)')+
-  xlab('Log(中國旅客密集度)')
+  xlab('Log(中國旅客密集度)') +
+  theme(text = element_text(family = "Heiti TC Medium"))
+        
 
-ggplot(travel_leak, aes(x = log(tw_exposed), y = imported_sum, label = Country.Name)) + 
+ggplot(travel_leak, aes(x = log(tw_exposed), y = log(imported_sum), label = Country.Name)) + 
   geom_text_repel() + 
   theme_minimal()+
   geom_point()+
   ggtitle("歐洲、地中海週邊旅遊\n台灣旅客暴露度與確診人數關係") + 
-  ylab('台灣境外確診人數')+
-  xlab('Log(台灣旅客暴露度)')
+  ylab('Log(台灣境外確診人數)')+
+  xlab('Log(台灣旅客暴露度)') +
+  theme(text = element_text(family = "Heiti TC Medium"))
+
 
 ###end
 
