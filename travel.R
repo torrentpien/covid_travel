@@ -5,7 +5,10 @@ library(writexl)
 library(xlsx)
 library(ggplot2)
 library(ggrepel)
+library(Hmisc)
 library(stringdist)
+
+options(warn = -1)
 
 #國別碼
 
@@ -155,6 +158,45 @@ cn_outbound$iso3c[cn_outbound$country == "Venezuela, Bolivarian Republic of"] <-
 cn_outbound$iso3c[cn_outbound$country == "Slovakia"] <- "SVK"
 cn_outbound$iso3c[cn_outbound$country == "Congo"] <- "COG"
 
+
+#航空旅客資料
+
+air_psg <- read.csv("data/Air travel_201802-04.csv", stringsAsFactors = FALSE)
+
+colnames(air_psg) <- c("country", "volume", "risk")
+
+air_psg$rank <- sapply(air_psg$country, function(x) {
+  which.min(stringdist::stringdist(x, country_code$country, method = 'lcs', useBytes = TRUE))
+})
+
+air_psg$iso3c <- country_code$iso3c[as.numeric(air_psg$rank)]
+
+air_psg$iso3c[air_psg$country == "Russia"] <- "RUS"
+air_psg$iso3c[air_psg$country == "Reunion"] <- "REU"
+air_psg$iso3c[air_psg$country == "Congo (Brazzaville)"] <- "COG"
+air_psg$iso3c[air_psg$country == "Bonaire, Saint Eustatius and Saba"] <- "BES"
+air_psg$iso3c[air_psg$country == "Turks-Caicos"] <- "TCA"
+air_psg$iso3c[air_psg$country == "Egypt"] <- "EGY"
+air_psg$iso3c[air_psg$country == "Cook Islands"] <- "COK"
+air_psg$iso3c[air_psg$country == "Laos"] <- "LAO"
+air_psg$iso3c[air_psg$country == "Guadeloupe"] <- "GLP"
+air_psg$iso3c[air_psg$country == "Micronesia"] <- "FSM"
+air_psg$iso3c[air_psg$country == "Iran"] <- "IRN"
+air_psg$iso3c[air_psg$country == "Kyrgyzstan"] <- "KGZ"
+air_psg$iso3c[air_psg$country == "Korea (South)"] <- "KOR"
+air_psg$iso3c[air_psg$country == "Korea (North)"] <- "PRK"
+air_psg$iso3c[air_psg$country == "Svalbard"] <- "SJM"
+air_psg$iso3c[air_psg$country == "Congo (Kinshasa)"] <- "COD"
+air_psg$iso3c[air_psg$country == "Martinique"] <- "MTQ"
+air_psg$iso3c[air_psg$country == "Jersey"] <- "JEY"
+air_psg$iso3c[air_psg$country == "Syria"] <- "SYR"
+air_psg$iso3c[air_psg$country == "Slovakia"] <- "SVK"
+air_psg$iso3c[air_psg$country == "Swaziland"] <- "SWZ"
+air_psg$iso3c[air_psg$country == "Taiwan"] <- "TWN"
+air_psg$iso3c[air_psg$country == "Virgin Islands (GB)"] <- "VGB"
+air_psg$iso3c[air_psg$country == "Gambia"] <- "GMB"
+
+
 #世界銀行各國旅客統計
 
 wb_arrival <- read.csv("data/API_ST.INT.ARVL_DS2_en_csv_v2_868314.csv", skip = 4)
@@ -188,7 +230,7 @@ wb_dense <- rename(wb_dense, "dense_2018" = "X2018")
 
 #John Hopkins COVID19 data
 
-COVID_case <- read.csv("data/time_series_2019-ncov-Confirmed.csv", stringsAsFactors = FALSE)
+COVID_case <- read.csv("data/time_series_covid19_confirmed_global_20200324.csv", stringsAsFactors = FALSE)
 
 JP_country <- data.frame(country = unique(COVID_case$Country.Region))
 
@@ -203,17 +245,21 @@ JP_country$iso3c[JP_country$country == "Brunei"] <- "BRN"
 JP_country$iso3c[JP_country$country == "Congo (Brazzaville)"] <- "COG"
 JP_country$iso3c[JP_country$country == "Czechia"] <- "CZE"
 JP_country$iso3c[JP_country$country == "Egypt"] <- "EGY"
+JP_country$iso3c[JP_country$country == "Diamond Princess"] <- NA
 JP_country$iso3c[JP_country$country == "Cruise Ship"] <- NA
 JP_country$iso3c[JP_country$country == "US"] <- "USA"
 JP_country$iso3c[JP_country$country == "Eswatini"] <- "SWZ"
 JP_country$iso3c[JP_country$country == "Iran"] <- "IRN"
+JP_country$iso3c[JP_country$country == "Laos"] <- "LAO"
 JP_country$iso3c[JP_country$country == "Kyrgyzstan"] <- "KGZ"
 JP_country$iso3c[JP_country$country == "Congo (Kinshasa)"] <- "COD"
 JP_country$iso3c[JP_country$country == "Martinique"] <- "MTQ"
 JP_country$iso3c[JP_country$country == "New Caledonia"] <- "NCL"
+JP_country$iso3c[JP_country$country == "Syria"] <- "SYR"
 JP_country$iso3c[JP_country$country == "Slovakia"] <- "SVK"
 JP_country$iso3c[JP_country$country == "Holy See"] <- "VAT"
 JP_country$iso3c[JP_country$country == "Taiwan*"] <- "TWN"
+JP_country$iso3c[JP_country$country == "Gambia"] <- "GMB"
 
 COVID_case <- COVID_case %>%
   left_join(JP_country, by = c("Country.Region" = "country"))
@@ -235,7 +281,8 @@ COVID_sum <- COVID_case %>%
             `20200221` = sum(X2.21.20),
             `20200304` = sum(X3.4.20),
             `20200307` = sum(X3.7.20),
-            `20200318` = sum(X3.18.20))
+            `20200318` = sum(X3.18.20),
+            `20200324` = sum(X3.24.20))
 
 #台灣境外移入來源
 
@@ -289,17 +336,25 @@ merged <- wb_arrival %>%
   full_join(wb_dense[, c(2, 3, 4)], by = "Country.Code") %>%
   full_join(china_trade, by = c("Country.Code" = "dest")) %>%
   full_join(COVID_sum, by = c("Country.Code" = "iso3c")) %>%
-  full_join(imported, by = c("Country.Code" = "iso3c"))
+  full_join(imported, by = c("Country.Code" = "iso3c")) %>%
+  full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c"))
 
-merged[, 19:34][is.na(merged[, 19:34])] <- 0
 
-merged <- read.csv("data/all_merged.csv", stringsAsFactors = FALSE)
+merged[, 19:37][is.na(merged[, 19:37])] <- 0
+
+merged <- merged %>%
+  full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c"))
+
+#write.csv(merged, "data/merged_20200325.csv", row.names = FALSE)
+
+merged <- read.csv("data/merged_20200325.csv", stringsAsFactors = FALSE)
 
 merged <- merged %>%
   mutate(tour_popu_2017 = sum_2017 + cn_arr_2017,
          tour_popu_2018 = sum_2018 + cn_arr_2018,
          cn_tour_dense = tour_popu_2018 * dense_2018,
-         tw_exposed = sum * cn_tour_dense)
+         cn_psg_dense = volume * dense_2018,
+         tw_exposed = sum * cn_tour_dense * X20200318)
 
 travel_leak <- merged %>%
   filter(hot_travel == 1)
@@ -312,34 +367,44 @@ travel_leak <- merged %>%
 
 #plot
 
-crucial_date <- colnames(travel_leak)[20:34]
+crucial_date <- colnames(travel_leak)[19:34]
 
-for (i in 1:15) {
+for (i in 1:16) {
   
-  df_plot <- data.frame(x = log(travel_leak$cn_tour_dense), y = log(travel_leak[, crucial_date[i]] + 1), name = travel_leak$Country.Name)
+  df_plot <- data.frame(x = log(travel_leak$cn_psg_dense), y = log(travel_leak[, crucial_date[i]] + 1), name = travel_leak$Country.Name)
   
   date <- paste0(substr(crucial_date[i], 7, 7), "月", substr(crucial_date[i], 8, 9), "日")
   
   cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
     geom_text_repel() + 
-    theme_minimal()+
-    geom_point()+
-    ggtitle("歐洲、地中海週邊旅遊區\n中國旅遊密集度與確診人數關係") + 
+    theme_minimal() +
+    geom_point() +
+    ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
     ylab(paste0("Log(", date, "各國確診人數)")) +
-    xlab('Log(中國旅客密集度)') +
+    xlab('Log(中國航空旅客密集度)') +
     theme(text = element_text(family = "Heiti TC Medium"))
   
-  ggsave(paste0("plot/", crucial_date[i], ".png"), plot = cd_plot)
+  ggsave(paste0("plot_psg/", crucial_date[i], ".png"), plot = cd_plot)
   
 }
+
+ggplot(travel_leak, aes(x = log(cn_psg_dense), y = log(X20200318), label = Country.Name)) + 
+  geom_text_repel() + 
+  theme_minimal()+
+  geom_point()+
+  ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
+  ylab('Log(3月18日各國確診人數)')+
+  xlab('Log(中國航空旅客密集度)') +
+  theme(text = element_text(family = "Heiti TC Medium"))
+
 
 ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(X20200318), label = Country.Name)) + 
   geom_text_repel() + 
   theme_minimal()+
   geom_point()+
-  ggtitle("歐洲、地中海週邊旅遊區\n中國旅遊密集度與確診人數關係") + 
+  ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
   ylab('Log(3月18日各國確診人數)')+
-  xlab('Log(中國旅客密集度)') +
+  xlab('Log(中國航空旅客密集度)') +
   theme(text = element_text(family = "Heiti TC Medium"))
         
 
@@ -348,8 +413,17 @@ ggplot(travel_leak, aes(x = log(tw_exposed), y = log(imported_sum), label = Coun
   theme_minimal()+
   geom_point()+
   ggtitle("歐洲、地中海週邊旅遊\n台灣旅客暴露度與確診人數關係") + 
-  ylab('Log(台灣境外確診人數)')+
+  ylab('Log(台灣境外確診人數)') +
   xlab('Log(台灣旅客暴露度)') +
+  theme(text = element_text(family = "Heiti TC Medium"))
+
+ggplot(travel_leak, aes(x = log(X20200318), y = log(imported_sum), label = Country.Name)) + 
+  geom_text_repel() + 
+  theme_minimal()+
+  geom_point()+
+  ggtitle("歐洲、地中海週邊旅遊\n台灣境外旅遊人數與3月18日確診人數關係") + 
+  ylab('Log(3月18日台灣境外確診人數)') +
+  xlab('Log(台灣境外旅遊人數)') +
   theme(text = element_text(family = "Heiti TC Medium"))
 
 
@@ -359,12 +433,19 @@ ggplot(travel_leak, aes(x = log(tw_exposed), y = log(imported_sum), label = Coun
 hist(log(travel_leak$cn_tour_dense))
 
 
-plot(log(travel_leak$cn_tour_dense), log(travel_leak$`20200318`))
+plot(log(travel_leak$cn_tour_dense), log(travel_leak$X20200318))
 
-cor.test(log(travel_leak$cn_tour_dense), log(travel_leak$`20200318` + 1))
+cor.test(log(travel_leak$cn_psg_dense), log(travel_leak$X20200318 + 1))
 
+
+cor(log(travel_leak$cn_psg_dense), log(travel_leak$X20200318 + 1))
+
+
+rsq <- r ^ 2
 
 plot(log(travel_leak$cn_tour_dense), travel_leak$imported_sum)
+
+import_reg <- lm(log(X20200318 + 1) ~ log(cn_tour_dense), travel_leak)
 
 
 head(merged$cn_tour_dense)
