@@ -51,11 +51,15 @@ tw_outbound$hot_travel <- case_when(tw_outbound$cont == "歐洲" ~ 1,
                                     tw_outbound$country == "黎巴嫩" ~ 1,
                                     tw_outbound$country == "阿拉伯聯合大公國" ~ 1,
                                     tw_outbound$country == "土耳其" ~ 1,
+                                    tw_outbound$country == "埃及" ~ 1,
                                     tw_outbound$country == "摩洛哥" ~ 1,
                                     tw_outbound$country == "阿爾及利亞" ~ 1,
                                     tw_outbound$country == "突尼西亞	" ~ 1,
                                     TRUE ~ 0)
 
+eu_med <- tw_outbound[, c(1, 2, 7, 8)]
+
+write_xlsx(eu_med, "eu_med.xlsx")
 
 #各國赴中國遊客統計
 
@@ -286,19 +290,33 @@ COVID_sum <- COVID_case %>%
 
 #台灣境外移入來源
 
-imported <- read_xlsx("data/境外移入案例來源.xlsx")
-imported <- imported[, c(1:3, 6:8)]
-colnames(imported)[1] <- "country"
+imported <- read_xlsx("data/境外移入案例來源_20200325.xlsx", sheet = "全台武肺個案+國碼")
 
-imported <- imported[-1,]
-imported <- imported[-5,]
-
-imported <- separate_rows(imported, iso3c, sep = "\\|", convert = FALSE)
+colnames(imported)[3] <- "domestic"
 
 imported <- imported %>%
-  group_by(iso3c) %>%
-  summarise(imported_sum = sum(總計))
+  filter(domestic == "境外")
 
+imported <- imported %>%
+  dplyr::select(-contains("all"))
+
+imported[is.na(imported$`基因定序確認感染來源`) == FALSE, 4] <- imported$`基因定序確認感染來源`[is.na(imported$`基因定序確認感染來源`) == FALSE]
+imported[is.na(imported$`基因定序確認感染來源`) == FALSE, 5:10] <- NA
+
+imported <- imported %>%
+  gather(key = "in", value = country, 4:10)
+
+imported <- imported %>%
+  filter(is.na(country) == FALSE)
+
+imported <- imported %>%
+  group_by(公佈日期, country) %>%
+  summarise(count = n())
+
+imported <- imported %>%
+  spread(公佈日期, count)
+
+imported$import_sum <- rowSums(imported[,2:30], na.rm = TRUE)
 
 #trade data
 
@@ -336,14 +354,11 @@ merged <- wb_arrival %>%
   full_join(wb_dense[, c(2, 3, 4)], by = "Country.Code") %>%
   full_join(china_trade, by = c("Country.Code" = "dest")) %>%
   full_join(COVID_sum, by = c("Country.Code" = "iso3c")) %>%
-  full_join(imported, by = c("Country.Code" = "iso3c")) %>%
+  full_join(imported[,c(1, 31)], by = c("Country.Code" = "country")) %>%
   full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c"))
 
 
 merged[, 19:37][is.na(merged[, 19:37])] <- 0
-
-merged <- merged %>%
-  full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c"))
 
 #write.csv(merged, "data/merged_20200325.csv", row.names = FALSE)
 
@@ -384,18 +399,19 @@ for (i in 1:16) {
     xlab('Log(中國航空旅客密集度)') +
     theme(text = element_text(family = "Heiti TC Medium"))
   
-  ggsave(paste0("plot_psg/", crucial_date[i], ".png"), plot = cd_plot)
+  ggsave(paste0("plot_psg/", crucial_date[i], ".png"), plot = cd_plot, width = 640, height = 480)
   
 }
 
-ggplot(travel_leak, aes(x = log(cn_psg_dense), y = log(X20200318), label = Country.Name)) + 
+ggplot(travel_leak, aes(x = log(cn_psg_dense), y = log(X20200324), label = Country.Name)) + 
   geom_text_repel() + 
   theme_minimal()+
   geom_point()+
   ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
-  ylab('Log(3月18日各國確診人數)')+
+  ylab('Log(3月24日各國確診人數)')+
   xlab('Log(中國航空旅客密集度)') +
-  theme(text = element_text(family = "Heiti TC Medium"))
+  theme(text = element_text(family = "Heiti TC Medium")) +
+  stat_smooth(method = "lm")
 
 
 ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(X20200318), label = Country.Name)) + 
@@ -405,17 +421,18 @@ ggplot(travel_leak, aes(x = log(cn_tour_dense), y = log(X20200318), label = Coun
   ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
   ylab('Log(3月18日各國確診人數)')+
   xlab('Log(中國航空旅客密集度)') +
-  theme(text = element_text(family = "Heiti TC Medium"))
+  theme(text = element_text(family = "Heiti TC Medium")) 
         
 
-ggplot(travel_leak, aes(x = log(tw_exposed), y = log(imported_sum), label = Country.Name)) + 
+ggplot(travel_leak, aes(x = log(risk), y = log(import_sum), label = Country.Name)) + 
   geom_text_repel() + 
   theme_minimal()+
   geom_point()+
   ggtitle("歐洲、地中海週邊旅遊\n台灣旅客暴露度與確診人數關係") + 
   ylab('Log(台灣境外確診人數)') +
   xlab('Log(台灣旅客暴露度)') +
-  theme(text = element_text(family = "Heiti TC Medium"))
+  theme(text = element_text(family = "Heiti TC Medium")) +
+  stat_smooth(method = "lm")
 
 ggplot(travel_leak, aes(x = log(X20200318), y = log(imported_sum), label = Country.Name)) + 
   geom_text_repel() + 
