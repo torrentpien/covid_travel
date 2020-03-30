@@ -45,17 +45,17 @@ tw_outbound$iso3c[tw_outbound$年別 == "剛果共和國"] <- "COG"
 
 colnames(tw_outbound) <- c("cont", "country", "country_e", "201801", "201802", "sum", "iso3c")
 
-tw_outbound$hot_travel <- case_when(tw_outbound$cont == "歐洲" ~ 1,
-                                    tw_outbound$country == "以色列" ~ 1,
-                                    tw_outbound$country == "約旦" ~ 1,
-                                    tw_outbound$country == "黎巴嫩" ~ 1,
-                                    tw_outbound$country == "阿拉伯聯合大公國" ~ 1,
-                                    tw_outbound$country == "土耳其" ~ 1,
-                                    tw_outbound$country == "埃及" ~ 1,
-                                    tw_outbound$country == "摩洛哥" ~ 1,
-                                    tw_outbound$country == "阿爾及利亞" ~ 1,
-                                    tw_outbound$country == "突尼西亞	" ~ 1,
-                                    TRUE ~ 0)
+#tw_outbound$hot_travel <- case_when(tw_outbound$cont == "歐洲" ~ 1,
+#                                    tw_outbound$country == "以色列" ~ 1,
+#                                    tw_outbound$country == "約旦" ~ 1,
+#                                    tw_outbound$country == "黎巴嫩" ~ 1,
+#                                    tw_outbound$country == "阿拉伯聯合大公國" ~ 1,
+#                                    tw_outbound$country == "土耳其" ~ 1,
+#                                    tw_outbound$country == "埃及" ~ 1,
+#                                    tw_outbound$country == "摩洛哥" ~ 1,
+#                                    tw_outbound$country == "阿爾及利亞" ~ 1,
+#                                    tw_outbound$country == "突尼西亞	" ~ 1,
+#                                    TRUE ~ 0)
 
 #eu_med <- tw_outbound[, c(1, 2, 7, 8)]
 
@@ -513,12 +513,18 @@ china_trade <- trade_data %>%
 
 china_trade$dest <- toupper(china_trade$dest)
 
+#歐洲地中海國家
+
+eu_med_list <- read_xlsx("data/境外移入案例來源_20200330.xlsx", sheet = "歐洲、地中海國家標記") %>%
+  filter(mark == 1)
+
+
 #merge data
 
 merged <- wb_arrival %>%
   full_join(cn_outbound[, c(5, 2, 3)], by = c("Country.Code" = "iso3c")) %>%
   full_join(cn_arrival[, c(5, 2, 3)], by = c("Country.Code" = "iso3c")) %>%
-  full_join(tw_outbound[, c(7, 4, 5, 6, 8)], by = c("Country.Code" = "iso3c")) %>%
+  full_join(tw_outbound[, c(7, 4, 5, 6)], by = c("Country.Code" = "iso3c")) %>%
   full_join(tw_outbound_unwto[, c(5, 2, 3)], by = c("Country.Code" = "iso3c")) %>%
   full_join(tw_inbound[, c(4, 3)], by = c("Country.Code" = "iso3c")) %>%
   full_join(wb_gdp[, c(2, 3, 4)], by = "Country.Code") %>%
@@ -526,13 +532,14 @@ merged <- wb_arrival %>%
   full_join(china_trade, by = c("Country.Code" = "dest")) %>%
   full_join(covid_initium[, c(1, 4:28)], by = c("Country.Code" = "iso3c")) %>%
   full_join(imported_accum, by = c("Country.Code" = "country")) %>%
+  full_join(eu_med_list[, c(3:4)], by = c("Country.Code" = "iso3c")) %>%
   full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c")) %>%
   full_join(epi_risk[, c(8, 6)], by = c("Country.Code" = "iso3c"))
 
 merged <- merged %>%
   dplyr::select(one_of("Country.Code", "name", "name_zh"), everything())
 
-merged[, 24:69][is.na(merged[, 24:69])] <- 0
+merged[, 23:72][is.na(merged[, 23:72])] <- 0
 
 merged$name_zh[merged$name == "France"] <- "法國"
 
@@ -551,9 +558,9 @@ merged <- merged %>%
          cn_psg_dense = volume * dense_2018)
 
 eu_med <- merged %>%
-  filter(hot_travel == 1)
+  filter(mark == 1)
 
-crucial_date <- colnames(eu_med)[24:46]
+crucial_date <- colnames(eu_med)[23:45]
 
 #中國航空旅客密集度與確診人數
 
@@ -564,7 +571,7 @@ cn_aireffect$ln_cnpsg_dense <- log(cn_aireffect$cn_psg_dense)
 
 for (i in 1:23) {
   
-  df_plot <- data.frame(x = log(eu_med$cn_psg_dense), y = log(eu_med[, crucial_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
+  df_plot <- data.frame(x = log(eu_med$cn_psg_dense + 1), y = log(eu_med[, crucial_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
   date <- paste0(substr(crucial_date[i], 16, 16), "月", substr(crucial_date[i], 17, 18), "日")
   
