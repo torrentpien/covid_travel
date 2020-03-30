@@ -591,7 +591,7 @@ for (i in 1:23) {
     stat_smooth(method = "lm")
   
   ggsave(paste0("plot_psg/", crucial_date[i], ".png"), plot = cd_plot, 
-         width = 6.4, height = 4.8, dpi = 150)
+         width = 9, height = 3.2, dpi = 150)
   
   colnames(df_plot)[1:2] <- c("ln_cnpsg_dense", paste0("ln_", crucial_date[i]))
   
@@ -604,27 +604,23 @@ write_xlsx(cn_aireffect, "result/cn_aireffect.xlsx")
 
 #台灣外國旅遊與確診人數
 
-tw_tour_risk <- merged %>%
-  dplyr::select(1:3, 
-                one_of("hot_travel", "sum_unwto_2018", "sum", "risk", "epi_risk", "volume", "dense_2018"), 
-                contains(c("im_", "confirmed")))
 
-tw_tour_risk <- tw_tour_risk %>%
-  mutate(cn_psg_dense = volume * dense_2018,
-         tw_exposed_m = sum * cn_psg_dense,
-         tw_exposed_y = sum_unwto_2018 * cn_psg_dense)
+tw_tour_risk <- eu_med %>%
+  dplyr::select(one_of("Country.Code", "name_zh", "name", "sum", "cn_psg_dense"))
 
-tw_tour_risk <- tw_tour_risk %>%
-  filter(hot_travel == 1)
+tw_tour_risk$ln_twexpose <- log(tw_tour_risk$sum * (tw_tour_risk$cn_psg_dense + 1))
 
-crucial_date <- colnames(tw_tour_risk)[11:33]
-confirmed_date <- colnames(tw_tour_risk)[34:56]
+
+crucial_date <- colnames(eu_med)[23:45]
+tw_confirmed_date <- colnames(eu_med)[46:68]
 
 for (i in 1:23) {
   
-  df_plot <- data.frame(x = log(tw_tour_risk$tw_exposed_m * tw_tour_risk$cn_psg_dense * tw_tour_risk[, confirmed_date[i]] + 1), y = log(tw_tour_risk[, crucial_date[i]] + 1), name = tw_tour_risk$name)
+  df_plot <- data.frame(x = log(eu_med$sum * (eu_med$cn_psg_dense + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
-  date <- paste0(substr(crucial_date[i], 9, 9), "月", substr(crucial_date[i], 10, 11), "日")
+  date <- paste0(substr(crucial_date[i], 16, 16), "月", substr(crucial_date[i], 17, 18), "日")
+  
+  fit <- lm(y ~ x, df_plot)
   
   cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
     geom_text_repel() + 
@@ -634,12 +630,24 @@ for (i in 1:23) {
     ylab(paste0("Log(", date, "台灣境外確診人數)")) +
     xlab('Log(台灣旅客暴露度)') +
     theme(text = element_text(family = "Heiti TC Medium")) +
+    labs(title = paste("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係\n", 
+                       "Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       " P =",signif(summary(fit)$coef[2,4], 5))) +
     stat_smooth(method = "lm")
   
   ggsave(paste0("plot_twexpose/", crucial_date[i], ".png"), plot = cd_plot, 
          width = 6.4, height = 4.8, dpi = 150)
   
+  colnames(df_plot)[1:2] <- c("ln_twexpose", paste0("ln_", tw_confirmed_date[i]))
+  
+  tw_tour_risk <- tw_tour_risk %>%
+    left_join(df_plot[, c(4, 2)], by = c("Country.Code" = "iso3c"))
+  
+  
 }
+
+write_xlsx(tw_tour_risk, "result/tw_tour_risk.xlsx")
+
 
 
 for (i in 1:23) {
