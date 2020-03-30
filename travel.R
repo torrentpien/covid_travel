@@ -578,7 +578,7 @@ for (i in 1:23) {
   fit <- lm(y ~ x, df_plot)
   
   cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
-    geom_text_repel() + 
+    geom_text_repel(family = "Heiti TC Medium") + 
     theme_minimal() +
     geom_point() +
     ggtitle("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係") + 
@@ -602,13 +602,13 @@ for (i in 1:23) {
 
 write_xlsx(cn_aireffect, "result/cn_aireffect.xlsx")
 
-#台灣外國旅遊與確診人數
+#台灣外國旅遊暴露度與境外確診相關
 
 
-tw_tour_risk <- eu_med %>%
+tw_tour_expose <- eu_med %>%
   dplyr::select(one_of("Country.Code", "name_zh", "name", "sum", "cn_psg_dense"))
 
-tw_tour_risk$ln_twexpose <- log(tw_tour_risk$sum * (tw_tour_risk$cn_psg_dense + 1))
+tw_tour_expose$ln_twexpose <- log(tw_tour_expose$sum * (tw_tour_expose$cn_psg_dense + 1))
 
 
 crucial_date <- colnames(eu_med)[23:45]
@@ -623,15 +623,15 @@ for (i in 1:23) {
   fit <- lm(y ~ x, df_plot)
   
   cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
-    geom_text_repel() + 
+    geom_text_repel(family = "Heiti TC Medium") + 
     theme_minimal() +
     geom_point() +
     ggtitle("歐洲、地中海週邊旅遊區\n台灣旅客暴露度與確診人數關係") + 
     ylab(paste0("Log(", date, "台灣境外確診人數)")) +
     xlab('Log(台灣旅客暴露度)') +
     theme(text = element_text(family = "Heiti TC Medium")) +
-    labs(title = paste("歐洲、地中海週邊旅遊區\n中國航空旅客密集度與確診人數關係\n", 
-                       "Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+    labs(title = paste("歐洲、地中海週邊旅遊區\n台灣旅客暴露度與確診人數關係\n", 
+                       "Adj R2 = ", signif(summary(fit)$adj.r.squared, 5),
                        " P =",signif(summary(fit)$coef[2,4], 5))) +
     stat_smooth(method = "lm")
   
@@ -640,6 +640,50 @@ for (i in 1:23) {
   
   colnames(df_plot)[1:2] <- c("ln_twexpose", paste0("ln_", tw_confirmed_date[i]))
   
+  tw_tour_expose <- tw_tour_expose %>%
+    left_join(df_plot[, c(4, 2)], by = c("Country.Code" = "iso3c"))
+  
+  
+}
+
+write_xlsx(tw_tour_expose, "result/tw_tour_expose.xlsx")
+
+#各國風險度與台灣境外確診相關
+
+tw_tour_risk <- eu_med %>%
+  dplyr::select(one_of("Country.Code", "name_zh", "name", "sum", "risk"))
+
+tw_tour_risk$ln_tw_risk <- log(tw_tour_risk$sum * (tw_tour_risk$risk + 1))
+
+crucial_date <- colnames(eu_med)[23:45]
+tw_confirmed_date <- colnames(eu_med)[46:68]
+
+for (i in 1:23) {
+  
+  df_plot <- data.frame(x = log(eu_med$sum * (eu_med$risk + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
+  
+  date <- paste0(substr(crucial_date[i], 16, 16), "月", substr(crucial_date[i], 17, 18), "日")
+  
+  fit <- lm(y ~ x, df_plot)
+  
+  cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
+    geom_text_repel(family = "Heiti TC Medium") + 
+    theme_minimal() +
+    geom_point() +
+    ggtitle("歐洲、地中海週邊旅遊區\n台灣旅客風險度與確診人數關係") + 
+    ylab(paste0("Log(", date, "台灣境外確診人數)")) +
+    xlab('Log(台灣旅客風險度)') +
+    theme(text = element_text(family = "Heiti TC Medium")) +
+    labs(title = paste("歐洲、地中海週邊旅遊區\n台灣旅客風險度與確診人數關係\n", 
+                       "Adj R2 = ", signif(summary(fit)$adj.r.squared, 5),
+                       " P =",signif(summary(fit)$coef[2,4], 5))) +
+    stat_smooth(method = "lm")
+  
+  ggsave(paste0("plot_risk/", crucial_date[i], ".png"), plot = cd_plot, 
+         width = 6.4, height = 4.8, dpi = 150)
+  
+  colnames(df_plot)[1:2] <- c("ln_twrisk", paste0("ln_", tw_confirmed_date[i]))
+  
   tw_tour_risk <- tw_tour_risk %>%
     left_join(df_plot[, c(4, 2)], by = c("Country.Code" = "iso3c"))
   
@@ -647,6 +691,51 @@ for (i in 1:23) {
 }
 
 write_xlsx(tw_tour_risk, "result/tw_tour_risk.xlsx")
+
+
+#各國epi風險度與台灣境外確診相關
+
+tw_tour_epirisk <- eu_med %>%
+  dplyr::select(one_of("Country.Code", "name_zh", "name", "sum", "epi_risk"))
+
+tw_tour_epirisk$ln_tw_epirisk <- log(tw_tour_epirisk$sum * (tw_tour_epirisk$epi_risk + 1))
+
+crucial_date <- colnames(eu_med)[23:45]
+tw_confirmed_date <- colnames(eu_med)[46:68]
+
+for (i in 1:23) {
+  
+  df_plot <- data.frame(x = log(eu_med$sum * (eu_med$epi_risk + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
+  
+  date <- paste0(substr(crucial_date[i], 16, 16), "月", substr(crucial_date[i], 17, 18), "日")
+  
+  fit <- lm(y ~ x, df_plot)
+  
+  cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
+    geom_text_repel(family = "Heiti TC Medium") + 
+    theme_minimal() +
+    geom_point() +
+    ggtitle("歐洲、地中海週邊旅遊區\n台灣旅客epi風險度與確診人數關係") + 
+    ylab(paste0("Log(", date, "台灣境外確診人數)")) +
+    xlab('Log(台灣旅客epi風險度)') +
+    theme(text = element_text(family = "Heiti TC Medium")) +
+    labs(title = paste("歐洲、地中海週邊旅遊區\n台灣旅客epi風險度與確診人數關係\n", 
+                       "Adj R2 = ", signif(summary(fit)$adj.r.squared, 5),
+                       " P =",signif(summary(fit)$coef[2,4], 5))) +
+    stat_smooth(method = "lm")
+  
+  ggsave(paste0("plot_epirisk/", crucial_date[i], ".png"), plot = cd_plot, 
+         width = 6.4, height = 4.8, dpi = 150)
+  
+  colnames(df_plot)[1:2] <- c("ln_tw_epirisk", paste0("ln_", tw_confirmed_date[i]))
+  
+  tw_tour_epirisk <- tw_tour_epirisk %>%
+    left_join(df_plot[, c(4, 2)], by = c("Country.Code" = "iso3c"))
+  
+  
+}
+
+write_xlsx(tw_tour_epirisk, "result/tw_tour_epirisk.xlsx")
 
 
 
