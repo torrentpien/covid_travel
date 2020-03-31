@@ -567,7 +567,7 @@ crucial_date <- colnames(eu_med)[23:45]
 cn_aireffect <- eu_med %>%
   dplyr::select(one_of("Country.Code", "name_zh", "name", "cn_psg_dense"))
 
-cn_aireffect$ln_cnpsg_dense <- log(cn_aireffect$cn_psg_dense)
+cn_aireffect$ln_cnpsg_dense <- log(cn_aireffect$cn_psg_dense + 1)
 
 for (i in 1:23) {
   
@@ -591,7 +591,7 @@ for (i in 1:23) {
     stat_smooth(method = "lm")
   
   ggsave(paste0("plot_psg/", crucial_date[i], ".png"), plot = cd_plot, 
-         width = 9, height = 3.2, dpi = 150)
+         width = 8, height = 3.2, dpi = 150)
   
   colnames(df_plot)[1:2] <- c("ln_cnpsg_dense", paste0("ln_", crucial_date[i]))
   
@@ -737,50 +737,10 @@ for (i in 1:23) {
 
 write_xlsx(tw_tour_epirisk, "result/tw_tour_epirisk.xlsx")
 
+#各國中國旅客密集度與確診數bar plot
 
 
-for (i in 1:23) {
-  
-  df_plot <- data.frame(x = log(tw_tour_risk$risk), y = log(tw_tour_risk[, crucial_date[i]] + 1), name = tw_tour_risk$name)
-  
-  date <- paste0(substr(crucial_date[i], 9, 9), "月", substr(crucial_date[i], 10, 11), "日")
-  
-  cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
-    geom_text_repel() + 
-    theme_minimal() +
-    geom_point() +
-    ggtitle("歐洲、地中海週邊旅遊區\n各國風險度") + 
-    ylab(paste0("Log(", date, "台灣境外確診人數)")) +
-    xlab('Log(各國風險度)') +
-    theme(text = element_text(family = "Heiti TC Medium")) +
-    stat_smooth(method = "lm")
-  
-  ggsave(paste0("plot_risk/", crucial_date[i], ".png"), plot = cd_plot, 
-         width = 6.4, height = 4.8, dpi = 150)
-  
-}
 
-
-for (i in 1:23) {
-  
-  df_plot <- data.frame(x = log(tw_tour_risk$epi_risk), y = log(tw_tour_risk[, crucial_date[i]] + 1), name = tw_tour_risk$name)
-  
-  date <- paste0(substr(crucial_date[i], 9, 9), "月", substr(crucial_date[i], 10, 11), "日")
-  
-  cd_plot <- ggplot(df_plot, aes(x = x, y = y, label = name)) + 
-    geom_text_repel() + 
-    theme_minimal() +
-    geom_point() +
-    ggtitle("歐洲、地中海週邊旅遊區\n各國風險度") + 
-    ylab(paste0("Log(", date, "台灣境外確診人數)")) +
-    xlab('Log(各國風險度)') +
-    theme(text = element_text(family = "Heiti TC Medium")) +
-    stat_smooth(method = "lm")
-  
-  ggsave(paste0("plot_epirisk/", crucial_date[i], ".png"), plot = cd_plot, 
-         width = 6.4, height = 4.8, dpi = 150)
-  
-}
 
 #plot end
 
