@@ -14,8 +14,6 @@
 
 各國確診人數的資料來源：端傳媒整理
 
-=======
->>>>>>> 8b01004610682ecd20ebe3c965c9db34e620fe4f
 圖檔：https://github.com/torrentpien/covid_travel/tree/master/plot_psg
 
 資料檔：https://github.com/torrentpien/covid_travel/blob/master/result/cn_aireffect.xlsx
@@ -27,6 +25,12 @@
 <p align="center"> 
 <img src="https://github.com/torrentpien/covid_travel/blob/master/plot_twexpose/confirmed_20200325.png?raw=true">
 </p>
+
+台灣旅客暴露度 ＝ 台灣旅客2018年1~2月赴各國旅遊人數 X 中國航空旅客密集度
+
+「台灣旅客2018年1~2月赴各國旅遊人數」的資料來源：交通部觀光局（註：因2018年9月觀光局統計方式變更，2019、2020年的台灣境外旅遊資料許多歐洲、亞洲國家的旅遊數字為0，與真實旅遊狀態不同，故以2018年1月、2月的數字進行推算）
+
+台灣境外確診人數：端傳媒整理（註：多國旅遊無法確認染疫國家，將旅行國家加上轉機國皆納入計算）
 
 圖檔：https://github.com/torrentpien/covid_travel/tree/master/plot_twexpose
 
