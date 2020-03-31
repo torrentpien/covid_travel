@@ -14,6 +14,8 @@
 
 各國確診人數的資料來源：端傳媒整理
 
+=======
+>>>>>>> 8b01004610682ecd20ebe3c965c9db34e620fe4f
 圖檔：https://github.com/torrentpien/covid_travel/tree/master/plot_psg
 
 資料檔：https://github.com/torrentpien/covid_travel/blob/master/result/cn_aireffect.xlsx
