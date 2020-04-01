@@ -14,7 +14,7 @@ options(warn = -1)
 
 country_code <- read_xlsx("data/countries.xlsx")
 
-#台灣出境國統計觀光局
+#####--台灣出境國統計觀光局-----
 
 tw_outbound <- read.csv("data/OutboundVisitor-20180102.csv", stringsAsFactors = FALSE, sep = "\t")
 
@@ -61,7 +61,7 @@ colnames(tw_outbound) <- c("cont", "country", "country_e", "201801", "201802", "
 
 #write_xlsx(eu_med, "eu_med.xlsx")
 
-#台灣出境國統計 unwto
+#####----台灣出境國統計 unwto----
 
 tw_outbound_unwto <- read_xlsx("data/0158250119952018202001.xlsx", skip = 5)
 
@@ -115,7 +115,7 @@ tw_outbound_unwto$iso3c[tw_outbound_unwto$country == "Venezuela, Bolivarian Repu
 tw_outbound_unwto$iso3c[tw_outbound_unwto$country == "Slovakia"] <- "SVK"
 tw_outbound_unwto$iso3c[tw_outbound_unwto$country == "Congo"] <- "COG" 
 
-#台灣入境旅客國家統計
+#####----台灣入境旅客國家統計----
 
 tw_inbound <- read.csv("data/出國旅客按目的地統計-2018全年.csv", stringsAsFactors = FALSE, sep = "\t")
 
@@ -155,7 +155,7 @@ tw_inbound$iso3c[is.na(tw_inbound$iso3c) == TRUE] <- tw_inbound_iso3c$iso3c
 
 colnames(tw_inbound)[1:2] <- c("country", "country_e")
 
-#各國赴中國遊客統計
+#####----各國赴中國遊客統計----
 
 cn_arrival <- read_xlsx("data/0156012120142018201912.xlsx", skip = 5)
 
@@ -202,7 +202,7 @@ cn_arrival <- rename(cn_arrival, "cn_arr_2017" = "2017")
 cn_arrival <- rename(cn_arrival, "cn_arr_2018" = "2018")
 
 
-#中國遊客赴各國統計
+#####----中國遊客赴各國統計----
 
 cn_outbound <- read_xlsx("data/0156250119952018202001.xlsx", skip = 5)
 
@@ -257,7 +257,7 @@ cn_outbound$iso3c[cn_outbound$country == "Slovakia"] <- "SVK"
 cn_outbound$iso3c[cn_outbound$country == "Congo"] <- "COG"
 
 
-#航空旅客資料
+#----航空旅客資料----
 
 air_psg <- read.csv("data/Air travel_201802-04.csv", stringsAsFactors = FALSE)
 
@@ -294,7 +294,7 @@ air_psg$iso3c[air_psg$country == "Taiwan"] <- "TWN"
 air_psg$iso3c[air_psg$country == "Virgin Islands (GB)"] <- "VGB"
 air_psg$iso3c[air_psg$country == "Gambia"] <- "GMB"
 
-#epirisk
+#----epirisk----
 
 epi_risk <- read.csv("data/epirisk-CHN_January.csv", stringsAsFactors = FALSE)
 
@@ -317,7 +317,7 @@ epi_risk$iso3c[epi_risk$label == "Taiwan"] <- "TWN"
 
 epi_risk <- rename(epi_risk, epi_risk = risk)
 
-#世界銀行各國旅客統計
+#----世界銀行各國旅客統計----
 
 wb_arrival <- read.csv("data/API_ST.INT.ARVL_DS2_en_csv_v2_868314.csv", skip = 4)
 wb_arrival <- wb_arrival[, c(1, 2, 62, 63)]
@@ -328,7 +328,7 @@ wb_arrival <- rename(wb_arrival, "tour_arr_2017" = "X2017")
 wb_arrival <- rename(wb_arrival, "tour_arr_2018" = "X2018")
 
 
-#世界銀行GDP
+#----世界銀行GDP----
 
 wb_gdp <- read.csv("data/API_NY.GDP.PCAP.CD_DS2_en_csv_v2_866857.csv", skip = 4)
 wb_gdp <- wb_gdp[, c(1, 2, 62, 63)]
@@ -338,7 +338,7 @@ wb_gdp$X2018[is.na(wb_gdp$X2018) == TRUE] <- wb_gdp$X2017[is.na(wb_gdp$X2018) ==
 wb_gdp <- rename(wb_gdp, "gdp_2017" = "X2017")
 wb_gdp <- rename(wb_gdp, "gdp_2018" = "X2018")
 
-#世界銀行人口密度
+#----世界銀行人口密度----
 
 wb_dense <- read.csv("data/API_EN.POP.DNST_DS2_en_csv_v2_868885.csv", skip = 4)
 wb_dense <- wb_dense[, c(1, 2, 62, 63)]
@@ -348,7 +348,7 @@ wb_dense$X2018[is.na(wb_dense$X2018) == TRUE] <- wb_dense$X2017[is.na(wb_dense$X
 wb_dense <- rename(wb_dense, "dense_2017" = "X2017")
 wb_dense <- rename(wb_dense, "dense_2018" = "X2018")
 
-#John Hopkins COVID19 data
+#----John Hopkins COVID19 data----
 
 COVID_case <- read.csv("data/time_series_covid19_confirmed_global_20200324.csv", stringsAsFactors = FALSE)
 
@@ -404,15 +404,15 @@ COVID_sum <- COVID_case %>%
             `20200318` = sum(X3.18.20),
             `20200324` = sum(X3.24.20))
 
-#端傳媒紀錄確診案例
+#----端傳媒紀錄確診案例----
 
-covid_initium <- read_xlsx("data/initium_20200329.xlsx", sheet = "new sheet")
-covid_initium <- rename(covid_initium, confirmed_20200329 = `...184`)
+covid_initium <- read_xlsx("data/武漢肺炎_20200331.xlsx", sheet = "new sheet")
+#covid_initium <- rename(covid_initium, confirmed_20200329 = `...184`)
 
 covid_initium <- covid_initium %>%
   dplyr::select(1:5, contains("confirmed"))
 
-covid_initium[41, 6:95] <- colSums(covid_initium[1:31, 6:95])
+covid_initium[41, 6:97] <- colSums(covid_initium[1:31, 6:97])
 
 covid_initium <- covid_initium %>%
   filter(type != "china") %>%
@@ -421,17 +421,18 @@ covid_initium <- covid_initium %>%
 covid_initium <- covid_initium %>%
   dplyr::select(1:5, contains(c("20200111", "20200122", "20200123", "20200124", "20200126",
                               "20200202", "20200205", "20200206", "20200207", "20200210",
-                              "20200217", "20200219", "20200221",
+                              "20200211", "20200217", "20200219", "20200221", "20200223",
+                              "20200225", "20200227",
                               "20200304", "20200307", "20200310", "20200311", "20200312",
-                              "20200314", "20200318", "20200320", "20200324", "20200325",
-                              "20200331")))
+                              "20200314", "20200316", "20200318", "20200320", "20200324", 
+                              "20200325", "20200331")))
 
 #write_xlsx(covid_initium, "data/initium.xlsx")
 
 
-#台灣境外移入來源
+#----台灣境外移入來源----
 
-imported <- read_xlsx("data/境外移入案例來源_20200328.xlsx", sheet = "全台武肺個案+國碼")
+imported <- read_xlsx("data/境外移入案例來源_20200331.xlsx", sheet = "全台武肺個案+國碼")
 
 colnames(imported)[3] <- "domestic"
 
@@ -468,26 +469,31 @@ imported_accum <- imported %>%
          im_20200206 = rowSums(imported[, 2:9], na.rm = TRUE),
          im_20200207 = rowSums(imported[, 2:9], na.rm = TRUE),
          im_20200210 = rowSums(imported[, 2:11], na.rm = TRUE),
+         im_20200211 = rowSums(imported[, 2:11], na.rm = TRUE),
          im_20200217 = rowSums(imported[, 2:11], na.rm = TRUE),
          im_20200219 = rowSums(imported[, 2:11], na.rm = TRUE),
-         im_20200217 = rowSums(imported[, 2:11], na.rm = TRUE),
          im_20200221 = rowSums(imported[, 2:11], na.rm = TRUE),
+         im_20200223 = rowSums(imported[, 2:11], na.rm = TRUE),
+         im_20200225 = rowSums(imported[, 2:11], na.rm = TRUE),
+         im_20200227 = rowSums(imported[, 2:11], na.rm = TRUE),
          im_20200304 = rowSums(imported[, 2:13], na.rm = TRUE),
          im_20200307 = rowSums(imported[, 2:14], na.rm = TRUE),
          im_20200310 = rowSums(imported[, 2:15], na.rm = TRUE),
          im_20200311 = rowSums(imported[, 2:16], na.rm = TRUE),
          im_20200312 = rowSums(imported[, 2:17], na.rm = TRUE),
          im_20200314 = rowSums(imported[, 2:18], na.rm = TRUE),
+         im_20200316 = rowSums(imported[, 2:20], na.rm = TRUE),
          im_20200318 = rowSums(imported[, 2:22], na.rm = TRUE),
          im_20200320 = rowSums(imported[, 2:24], na.rm = TRUE),
          im_20200324 = rowSums(imported[, 2:28], na.rm = TRUE),
-         im_20200325 = rowSums(imported[, 2:29], na.rm = TRUE))
+         im_20200325 = rowSums(imported[, 2:29], na.rm = TRUE),
+         im_20200331 = rowSums(imported[, 2:35], na.rm = TRUE))
 
 imported_accum <- imported_accum %>%
   dplyr::select(1, contains("im"))
 
 
-#trade data
+#----trade data----
 
 trade_data <- read.table('data/year_origin_destination_hs07_4.tsv',
                   sep = '\t', header = TRUE, quote="")
@@ -513,13 +519,13 @@ china_trade <- trade_data %>%
 
 china_trade$dest <- toupper(china_trade$dest)
 
-#歐洲地中海國家
+#----歐洲地中海國家----
 
 eu_med_list <- read_xlsx("data/境外移入案例來源_20200330.xlsx", sheet = "歐洲、地中海國家標記") %>%
   filter(mark == 1)
 
 
-#merge data
+#----merge data----
 
 merged <- wb_arrival %>%
   full_join(cn_outbound[, c(5, 2, 3)], by = c("Country.Code" = "iso3c")) %>%
@@ -530,7 +536,7 @@ merged <- wb_arrival %>%
   full_join(wb_gdp[, c(2, 3, 4)], by = "Country.Code") %>%
   full_join(wb_dense[, c(2, 3, 4)], by = "Country.Code") %>%
   full_join(china_trade, by = c("Country.Code" = "dest")) %>%
-  full_join(covid_initium[, c(1, 4:28)], by = c("Country.Code" = "iso3c")) %>%
+  full_join(covid_initium[, c(1, 4:34)], by = c("Country.Code" = "iso3c")) %>%
   full_join(imported_accum, by = c("Country.Code" = "country")) %>%
   full_join(eu_med_list[, c(3:4)], by = c("Country.Code" = "iso3c")) %>%
   full_join(air_psg[, c(2, 3, 5)], by = c("Country.Code" = "iso3c")) %>%
@@ -539,11 +545,13 @@ merged <- wb_arrival %>%
 merged <- merged %>%
   dplyr::select(one_of("Country.Code", "name", "name_zh"), everything())
 
-merged[, 23:72][is.na(merged[, 23:72])] <- 0
+#colnames(merged)[80]
+
+merged[, 23:80][is.na(merged[, 23:80])] <- 0
 
 merged$name_zh[merged$name == "France"] <- "法國"
 
-#write.csv(merged, "data/merged_20200330.csv", row.names = FALSE)
+#write.csv(merged, "data/merged_20200331.csv", row.names = FALSE)
 
 #merged <- read.csv("data/merged_20200328.csv", stringsAsFactors = FALSE)
 
@@ -557,10 +565,14 @@ merged <- merged %>%
          cn_tour_dense = tour_popu_2018 * dense_2018,
          cn_psg_dense = volume * dense_2018)
 
+#加美國
+
+merged$mark[merged$Country.Code == "USA"] <- "1"
+
 eu_med <- merged %>%
   filter(mark == 1)
 
-crucial_date <- colnames(eu_med)[23:45]
+crucial_date <- colnames(eu_med)[23:51]
 
 #中國航空旅客密集度與確診人數
 
@@ -569,7 +581,7 @@ cn_aireffect <- eu_med %>%
 
 cn_aireffect$ln_cnpsg_dense <- log(cn_aireffect$cn_psg_dense + 1)
 
-for (i in 1:23) {
+for (i in 1:29) {
   
   df_plot <- data.frame(x = log(eu_med$cn_psg_dense + 1), y = log(eu_med[, crucial_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
@@ -611,10 +623,10 @@ tw_tour_expose <- eu_med %>%
 tw_tour_expose$ln_twexpose <- log(tw_tour_expose$sum * (tw_tour_expose$cn_psg_dense + 1))
 
 
-crucial_date <- colnames(eu_med)[23:45]
-tw_confirmed_date <- colnames(eu_med)[46:68]
+crucial_date <- colnames(eu_med)[23:51]
+tw_confirmed_date <- colnames(eu_med)[52:80]
 
-for (i in 1:23) {
+for (i in 1:29) {
   
   df_plot <- data.frame(x = log(eu_med$sum * (eu_med$cn_psg_dense + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
@@ -655,10 +667,10 @@ tw_tour_risk <- eu_med %>%
 
 tw_tour_risk$ln_tw_risk <- log(tw_tour_risk$sum * (tw_tour_risk$risk + 1))
 
-crucial_date <- colnames(eu_med)[23:45]
-tw_confirmed_date <- colnames(eu_med)[46:68]
+crucial_date <- colnames(eu_med)[23:51]
+tw_confirmed_date <- colnames(eu_med)[52:80]
 
-for (i in 1:23) {
+for (i in 1:29) {
   
   df_plot <- data.frame(x = log(eu_med$sum * (eu_med$risk + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
@@ -700,10 +712,10 @@ tw_tour_epirisk <- eu_med %>%
 
 tw_tour_epirisk$ln_tw_epirisk <- log(tw_tour_epirisk$sum * (tw_tour_epirisk$epi_risk + 1))
 
-crucial_date <- colnames(eu_med)[23:45]
-tw_confirmed_date <- colnames(eu_med)[46:68]
+crucial_date <- colnames(eu_med)[23:51]
+tw_confirmed_date <- colnames(eu_med)[52:80]
 
-for (i in 1:23) {
+for (i in 1:29) {
   
   df_plot <- data.frame(x = log(eu_med$sum * (eu_med$epi_risk + 1)), y = log(eu_med[, tw_confirmed_date[i]] + 1), name = eu_med$name_zh, iso3c = eu_med$Country.Code)
   
@@ -732,13 +744,36 @@ for (i in 1:23) {
   tw_tour_epirisk <- tw_tour_epirisk %>%
     left_join(df_plot[, c(4, 2)], by = c("Country.Code" = "iso3c"))
   
-  
 }
 
 write_xlsx(tw_tour_epirisk, "result/tw_tour_epirisk.xlsx")
 
 #各國中國旅客密集度與確診數bar plot
 
+cn_air_df <- cn_aireffect %>%
+  dplyr::select(one_of("Country.Code", "name_zh", "name", "ln_cnpsg_dense", "ln_confirmed_20200325")) %>%
+  arrange(desc(ln_cnpsg_dense))
+
+cn_air_df$group <- factor(rep(1:7, each = 10, length.out = nrow(cn_air_df)))
+
+cn_air_df$order <- factor(cn_air_df$name_zh, levels = cn_air_df$name_zh)
+
+cn_air_df <- cn_air_df %>%
+  filter(is.na(ln_cnpsg_dense) == FALSE,
+         ln_cnpsg_dense != 0)
+
+#cn_air_df <- cn_air_df %>% 
+#  gather(cate, data, 4:5)
+
+ggplot(cn_air_df) +
+  geom_bar(aes(x = order, y = ln_cnpsg_dense), position = "dodge", stat="identity", width=.5, colour = "blue") +
+  geom_point(aes(x = order, y = ln_confirmed_20200325)) +
+  geom_line(aes(x = order, y = ln_confirmed_20200325)) +
+  #geom_text(aes(label=data, group=cate), position=position_dodge(width=0.5), vjust=-0.5) +
+  facet_wrap(~group, scales="free_y", ncol = 1)+
+  theme_bw(base_size = 10) +
+  ylab('log(中國旅客密集度)/log(各國確診人數)') +
+  xlab("國家")
 
 
 
