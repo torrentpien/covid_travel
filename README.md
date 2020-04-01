@@ -3,7 +3,7 @@
 #### 第一組：中國航空旅客密集度與各國確診人數相關
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_psg/confirmed_20200325.png?raw=true">
+<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_psg/confirmed_20200331.png?raw=true">
 </p>
 
 中國航空旅客密集度：中國旅客2018年2月至4月飛往各國旅客人數 x 各國人口密度
@@ -23,7 +23,7 @@
 #### 第二組：台灣外國旅遊暴露度與台灣境外確診相關
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_twexpose/confirmed_20200325.png?raw=true">
+<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_twexpose/confirmed_20200331.png?raw=true">
 </p>
 
 台灣旅客暴露度 ＝ 台灣旅客2018年1~2月赴各國旅遊人數 X 中國航空旅客密集度
@@ -41,7 +41,7 @@
 #### 第三組：各國風險度與台灣境外確診相關
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_risk/confirmed_20200325.png?raw=true">
+<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_risk/confirmed_20200331.png?raw=true">
 </p>
 
 圖檔：https://github.com/torrentpien/covid_travel/tree/master/plot_risk
@@ -53,7 +53,7 @@
 #### 第四組：各國epi風險度與台灣境外確診相關
 
 <p align="center"> 
-<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_epirisk/confirmed_20200325.png?raw=true">
+<img src="https://github.com/torrentpien/covid_travel/blob/master/plot_epirisk/confirmed_20200331.png?raw=true">
 </p>
 
 圖檔：https://github.com/torrentpien/covid_travel/tree/master/plot_epirisk
