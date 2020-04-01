@@ -748,6 +748,13 @@ for (i in 1:29) {
 
 write_xlsx(tw_tour_epirisk, "result/tw_tour_epirisk.xlsx")
 
+#各國中國旅客與確診數map plot
+
+cn_air_map <- eu_med %>%
+  dplyr::select(one_of("Country.Code", "name_zh", "name", "cn_psg_dense", "volume"), contains("confirmed"))
+
+write_xlsx(cn_air_map, "result/cn_air_map.xlsx")
+
 #各國中國旅客密集度與確診數bar plot
 
 cn_air_df <- cn_aireffect %>%
