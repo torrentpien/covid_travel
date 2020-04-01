@@ -60,4 +60,9 @@
 
 資料檔：https://github.com/torrentpien/covid_travel/blob/master/result/tw_tour_epirisk.xlsx
 
+#### 第五組：歐洲、地中海各國地圖、中國旅遊人數、確診人數
+
+資料檔：https://github.com/torrentpien/covid_travel/blob/master/result/cn_air_map.xlsx
+
+
 
